@@ -437,6 +437,11 @@ class Runner:
         accumulations_params = self.checkpoint.accumulations_params
 
         # with self.stepper(self.hour_steps) as stepper:
+        file_prefix=os.environ.get('ANEMOI_INF_MEM_PROFILE', '')
+        if file_prefix != '':
+            max_entries=100000
+            LOGGER.info(f"Profiling memory to {ANEMOI_INF_MEM_PROFILE}/mem_snapshot.pickle (max {max_entries} entries)")
+            torch.cuda.memory._record_memory_history(max_entries=max_entries)
 
         for i in progress_callback(range(lead_time // self.hour_steps)):
             step = (i + 1) * self.hour_steps
@@ -513,6 +518,8 @@ class Runner:
                 input_tensor_torch[:, -1, :, computed_forcing_mask] = forcing
 
             # progress_callback(i)
+        if file_prefix != '':
+            torch.cuda.memory._dump_snapshot(f"{file_prefix}mem_snapshot.pickle")
 
     @cached_property
     def hour_steps(self):
