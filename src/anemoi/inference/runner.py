@@ -14,6 +14,7 @@ from functools import cached_property
 
 import numpy as np
 import torch
+import os
 from anemoi.utils.timer import Timer
 
 from .checkpoint import Checkpoint
@@ -440,7 +441,7 @@ class Runner:
         file_prefix=os.environ.get('ANEMOI_INF_MEM_PROFILE', '')
         if file_prefix != '':
             max_entries=100000
-            LOGGER.info(f"Profiling memory to {ANEMOI_INF_MEM_PROFILE}/mem_snapshot.pickle (max {max_entries} entries)")
+            LOGGER.info(f"Profiling memory to {file_prefix}/mem_snapshot.pickle (max {max_entries} entries)")
             torch.cuda.memory._record_memory_history(max_entries=max_entries)
 
         for i in progress_callback(range(lead_time // self.hour_steps)):
@@ -519,7 +520,7 @@ class Runner:
 
             # progress_callback(i)
         if file_prefix != '':
-            torch.cuda.memory._dump_snapshot(f"{file_prefix}mem_snapshot.pickle")
+            torch.cuda.memory._dump_snapshot(f"{file_prefix}/mem_snapshot.pickle")
 
     @cached_property
     def hour_steps(self):
